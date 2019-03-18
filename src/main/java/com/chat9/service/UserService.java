@@ -1,6 +1,10 @@
 package com.chat9.service;
 
 import com.chat9.pojo.Users;
+import com.chat9.pojo.vo.FriendRequestVO;
+import com.chat9.pojo.vo.MyFriendsVO;
+
+import java.util.List;
 
 public interface UserService {
     /*
@@ -17,4 +21,53 @@ public interface UserService {
         @Description: register
     */
     public Users saveUser(Users user);
+
+    /*
+        @Description: updateQRcode
+    */
+    public Users updateQRcode(Users user);
+    /*
+        @Description: update user info
+     */
+    public Users updateUserInfo(Users user);
+
+    /*
+        @Description: return enums according search user result
+     */
+    public Integer preconditionSearchFriends(String myUserId, String friendUsername);
+
+    /*
+        @Description: find user by username
+     */
+    public Users queryUserInfoByUsername(String username);
+
+    /*
+        @Description: add friend request
+     */
+    public void sendFriendRequest(String myUserId, String friendUsername);
+
+
+    /*
+        @Description: query friend request
+    */
+    public List<FriendRequestVO> queryFriendRequestList(String acceptUserId);
+
+    /*
+        @Description: delete friend request
+    */
+    public void deleteFriendRequest(String sendUserId, String acceptUserId);
+
+
+    /*
+        @Description: pass friend request
+                    1:delete friend request
+                    2:save friend in both way
+    */
+    public void passFriendRequest(String sendUserId, String acceptUserId);
+
+    /*
+    @Description: query all friends
+    */
+    public List<MyFriendsVO> queryMyFriends(String userId);
+
 }

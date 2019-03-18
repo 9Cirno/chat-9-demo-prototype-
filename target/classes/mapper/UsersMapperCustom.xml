@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chat9.mapper.UsersMapperCustom">
+
+  <select id="queryFriendRequestList" resultType="com.chat9.pojo.vo.FriendRequestVO"
+          parameterType="String">
+
+    SELECT
+      sender.id as sendUserId,
+      sender.username as sendUsername,
+      sender.face_image as sendFaceImage,
+      sender.nickname as sendNickname
+    FROM friends_request fr
+    LEFT JOIN users sender
+    ON fr.send_user_id = sender.id
+    WHERE fr.accept_user_id = #{acceptUserId}
+
+  </select>
+
+
+
+  <select id="queryMyFriends" resultType="com.chat9.pojo.vo.MyFriendsVO"
+          parameterType="String">
+
+    SELECT
+      u.id as friendUserId,
+      u.username as friendUsername,
+      u.face_image as friendFaceImage,
+      u.nickname as friendNickname
+    FROM my_friends mf
+    LEFT JOIN users u
+    ON u.id = mf.my_friend_user_id
+    WHERE mf.my_user_id = #{userId}
+
+  </select>
+
+
+
+
+</mapper>

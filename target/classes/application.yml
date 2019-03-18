@@ -1,0 +1,8 @@
+fdfs:
+  so-timeout: 10000
+  connect-timeout: 5000
+  thumb-image:             #缩略图生成参数
+    width: 80
+    height: 80
+  tracker-list:            #TrackerList参数,支持多个
+    - 35.236.22.150:22122
