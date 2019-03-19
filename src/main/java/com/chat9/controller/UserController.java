@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -87,6 +88,12 @@ public class UserController {
       user.setFaceImageBig(url);
 
       Users result = userService.updateUserInfo(user);
+
+
+      File file = new File(userFacePath);
+      file.delete();
+
+
       return JSONResult.ok(result);
 
    }

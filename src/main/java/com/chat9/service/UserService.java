@@ -1,5 +1,6 @@
 package com.chat9.service;
 
+import com.chat9.netty.ChatMsg;
 import com.chat9.pojo.Users;
 import com.chat9.pojo.vo.FriendRequestVO;
 import com.chat9.pojo.vo.MyFriendsVO;
@@ -69,5 +70,16 @@ public interface UserService {
     @Description: query all friends
     */
     public List<MyFriendsVO> queryMyFriends(String userId);
+
+
+    /*
+    @Description: store chat message to database, used com.netty.ChatMsg
+    */
+    public String saveMsg(ChatMsg chatMsg);
+
+    /*
+    @Description: batch sign message
+    */
+    public void updateMsgSigned(List<String> msgIdList);
 
 }

@@ -17,7 +17,7 @@ public class WSServerInitializer extends ChannelInitializer<SocketChannel>{
       // support large data stream
       pipeline.addLast(new ChunkedWriteHandler());
       // used for HttpMessage aggregates, to FullHttpRequest or FullHttpResponse
-      pipeline.addLast(new HttpObjectAggregator(1024*64));
+      pipeline.addLast(new HttpObjectAggregator(1024*128));
 
       // ============================ HTTP Support Above ==============================
 

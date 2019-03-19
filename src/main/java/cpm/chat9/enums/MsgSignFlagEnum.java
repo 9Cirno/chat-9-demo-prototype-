@@ -2,12 +2,12 @@ package cpm.chat9.enums;
 
 /**
  * 
- * @Description: 消息签收状态 枚举
+ * @Description: enums for unsign/sign
  */
 public enum MsgSignFlagEnum {
 	
-	unsign(0, "未签收"),
-	signed(1, "已签收");	
+	unsign(0, "unsign"),
+	signed(1, "sign");
 	
 	public final Integer type;
 	public final String content;

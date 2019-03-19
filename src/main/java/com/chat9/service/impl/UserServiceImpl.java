@@ -1,9 +1,7 @@
 package com.chat9.service.impl;
 
-import com.chat9.mapper.FriendsRequestMapper;
-import com.chat9.mapper.MyFriendsMapper;
-import com.chat9.mapper.UsersMapper;
-import com.chat9.mapper.UsersMapperCustom;
+import com.chat9.mapper.*;
+import com.chat9.netty.ChatMsg;
 import com.chat9.pojo.FriendsRequest;
 import com.chat9.pojo.MyFriends;
 import com.chat9.pojo.Users;
@@ -13,6 +11,7 @@ import com.chat9.service.UserService;
 import com.chat9.utils.FastDFSClient;
 import com.chat9.utils.FileUtils;
 import com.chat9.utils.QRCodeUtils;
+import cpm.chat9.enums.MsgSignFlagEnum;
 import cpm.chat9.enums.SearchFriendStatusEnum;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,7 @@ import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.entity.Example.Criteria;
 
 import javax.validation.constraints.AssertTrue;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -41,6 +41,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private MyFriendsMapper myFriendsMapper;
+
+    @Autowired
+    private ChatMsgMapper chatMsgMapper;
 
     @Autowired
     private FriendsRequestMapper friendsRequestMapper;
@@ -98,6 +101,10 @@ public class UserServiceImpl implements UserService {
         user.setId(id);
         user.setQrcode(qrCodeUrl);
         usersMapper.insert(user);
+
+        File file = new File(qrCodepath);
+        file.delete();
+
         return user;
     }
 
@@ -126,6 +133,10 @@ public class UserServiceImpl implements UserService {
 
         user.setQrcode(qrCodeUrl);
         usersMapper.updateByPrimaryKeySelective(user);
+
+        File file = new File(qrCodepath);
+        file.delete();
+
         return queryUserById(user.getId());
     }
 
@@ -246,6 +257,32 @@ public class UserServiceImpl implements UserService {
         List<MyFriendsVO> myFriends = usersMapperCustom.queryMyFriends(userId);
 
         return myFriends;
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public String saveMsg(ChatMsg chatMsg){
+
+        com.chat9.pojo.ChatMsg msgDB = new com.chat9.pojo.ChatMsg();
+        String msgId = sid.nextShort();
+        msgDB.setId(msgId);
+        msgDB.setAcceptUserId(chatMsg.getReceiverId());
+        msgDB.setSendUserId(chatMsg.getSenderId());
+        msgDB.setCreateTime(new Date());
+        msgDB.setSignFlag(MsgSignFlagEnum.unsign.type);
+        msgDB.setMsg(chatMsg.getMsg());
+
+        chatMsgMapper.insert(msgDB);
+
+        return msgId;
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void updateMsgSigned(List<String> msgIdList){
+        usersMapperCustom.batchUpdateMsgSigned(msgIdList);
     }
 
 }
