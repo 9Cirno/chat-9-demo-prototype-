@@ -53,9 +53,9 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
          String sendId = dataContent.getChatMsg().getSenderId();
          UserChannelRel.put(sendId, currentChannel);
 
-         for (Channel c:users){
-            System.out.println(c.id().asLongText());
-         }
+//         for (Channel c:users){
+//            System.out.println(c.id().asLongText());
+//         }
          UserChannelRel.output();
 
       }else if(action == MsgActionEnum.CHAT.type){
@@ -72,7 +72,8 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
 
          String msgId = userService.saveMsg(chatMsg);
          chatMsg.setMsgId(msgId);
-
+         DataContent dataContentMsg = new DataContent();
+         dataContentMsg.setChatMsg(chatMsg);
          //get receiver channel id
          Channel receiverChannel = UserChannelRel.get(receiverId);
          if (receiverChannel == null){
@@ -83,7 +84,7 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
             // when channel is not null, looking for if channel exists in channel group
             Channel findChannel = users.find(receiverChannel.id());
             if (findChannel != null){
-               receiverChannel.writeAndFlush(new TextWebSocketFrame(JsonUtils.objectToJson(chatMsg)));
+               receiverChannel.writeAndFlush(new TextWebSocketFrame(JsonUtils.objectToJson(dataContentMsg)));
             }else{
                // todo
                // null channel implies receiver not connected
@@ -106,7 +107,7 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
             }
          }
 
-         System.out.println(msgIdList.toString());
+         //System.out.println(msgIdList.toString());
          if(msgIdList!=null && !msgIdList.isEmpty() && msgIdList.size()>0){
             // batch sign
             userService.updateMsgSigned(msgIdList);
@@ -115,7 +116,7 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
 
       }else if(action == MsgActionEnum.KEEPALIVE.type){
          //2.4 heartbeat message
-
+         System.out.println("receive heartbeat");
       }
 
 

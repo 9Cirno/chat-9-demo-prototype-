@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 
 public class WSServerInitializer extends ChannelInitializer<SocketChannel>{
 
@@ -21,6 +22,16 @@ public class WSServerInitializer extends ChannelInitializer<SocketChannel>{
 
       // ============================ HTTP Support Above ==============================
 
+
+      // if client does not send any request in 1 minutes, disconnect with client
+      pipeline.addLast(new IdleStateHandler(58,59,60));
+      // custom heartbeat handler
+      pipeline.addLast(new HeartBeatHandler());
+
+
+
+
+      // ========================= HeartBeat Support start ============================
       // websocket server protocol, and give the router '/ws'
       /**
        * WebSocketServerProtocolHandler will take all the task for lift websocket server

@@ -36,12 +36,12 @@
 
 
   <!--public void batchUpdateMsgSigned(List<String> msgIdList);-->
-  <update id="batcwhUpdateMsgSigned">
+  <update id="batchUpdateMsgSigned">
+
     update chat_msg set sign_flag = 1 where id in
-    <foreach collection="List" item="item" index="index" open="(" separator="," close=")">
+    <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
       #{item}
     </foreach>
-
 
   </update>
 

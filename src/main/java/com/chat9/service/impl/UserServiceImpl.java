@@ -2,6 +2,8 @@ package com.chat9.service.impl;
 
 import com.chat9.mapper.*;
 import com.chat9.netty.ChatMsg;
+import com.chat9.netty.DataContent;
+import com.chat9.netty.UserChannelRel;
 import com.chat9.pojo.FriendsRequest;
 import com.chat9.pojo.MyFriends;
 import com.chat9.pojo.Users;
@@ -10,9 +12,13 @@ import com.chat9.pojo.vo.MyFriendsVO;
 import com.chat9.service.UserService;
 import com.chat9.utils.FastDFSClient;
 import com.chat9.utils.FileUtils;
+import com.chat9.utils.JsonUtils;
 import com.chat9.utils.QRCodeUtils;
+import cpm.chat9.enums.MsgActionEnum;
 import cpm.chat9.enums.MsgSignFlagEnum;
 import cpm.chat9.enums.SearchFriendStatusEnum;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -232,9 +239,35 @@ public class UserServiceImpl implements UserService {
     @Override
     public void passFriendRequest(String sendUserId, String acceptUserId){
 
-        saveFriend(sendUserId,acceptUserId);
-        saveFriend(acceptUserId,sendUserId);
-        deleteFriendRequest(sendUserId,acceptUserId);
+        //check if already added as friend, prevent duplicated insertion
+
+        Example mfe1 = new Example(MyFriends.class);
+        Criteria mfc1 = mfe1.createCriteria();
+        mfc1.andEqualTo("myUserId", sendUserId);
+        mfc1.andEqualTo("myFriendUserId", acceptUserId);
+        MyFriends myFriendsRel1 = myFriendsMapper.selectOneByExample(mfe1);
+
+        Example mfe2 = new Example(MyFriends.class);
+        Criteria mfc2 = mfe2.createCriteria();
+        mfc2.andEqualTo("myUserId", acceptUserId);
+        mfc2.andEqualTo("myFriendUserId", sendUserId);
+        MyFriends myFriendsRel2 = myFriendsMapper.selectOneByExample(mfe2);
+
+        if (myFriendsRel1 == null && myFriendsRel2==null){
+            saveFriend(sendUserId,acceptUserId);
+            saveFriend(acceptUserId,sendUserId);
+            deleteFriendRequest(sendUserId,acceptUserId);
+
+
+            Channel sendChannel = UserChannelRel.get(sendUserId);
+            if(sendChannel != null){
+                DataContent dataContent =new DataContent();
+                dataContent.setAction(MsgActionEnum.PULL_FRIEND.type);
+                sendChannel.writeAndFlush(
+                        new TextWebSocketFrame(
+                                JsonUtils.objectToJson(dataContent)));
+            }
+        }
 
     };
 
@@ -284,5 +317,19 @@ public class UserServiceImpl implements UserService {
     public void updateMsgSigned(List<String> msgIdList){
         usersMapperCustom.batchUpdateMsgSigned(msgIdList);
     }
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public List<com.chat9.pojo.ChatMsg> getUnReadMsgList(String acceptUserId){
+        Example chatExample = new Example(com.chat9.pojo.ChatMsg.class);
+        Criteria chatCriteria = chatExample.createCriteria();
+        chatCriteria.andEqualTo("signFlag",0);
+        chatCriteria.andEqualTo("acceptUserId",acceptUserId);
+
+        List<com.chat9.pojo.ChatMsg> result = chatMsgMapper.selectByExample(chatExample);
+        return result;
+
+    };
 
 }

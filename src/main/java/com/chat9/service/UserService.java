@@ -82,4 +82,10 @@ public interface UserService {
     */
     public void updateMsgSigned(List<String> msgIdList);
 
+    /*
+    @Description: request unsigned messages
+    */
+    public List<com.chat9.pojo.ChatMsg> getUnReadMsgList(String acceptUserId);
+
+
 }

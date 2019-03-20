@@ -1,5 +1,6 @@
 package com.chat9.controller;
 
+import com.chat9.annotation.NoRepeatSubmit;
 import com.chat9.pojo.Users;
 import com.chat9.pojo.bo.UsersBO;
 import com.chat9.pojo.vo.MyFriendsVO;
@@ -211,8 +212,6 @@ public class UserController {
    }
 
 
-
-
    @PostMapping("/myFriends")
    public JSONResult myFriends(String userId){
 
@@ -228,6 +227,19 @@ public class UserController {
 
    }
 
+   @PostMapping("/getUnReadMsgList")
+   public JSONResult getUnReadMsgList(String acceptUserId){
 
+      // if empty
+      if (StringUtils.isBlank(acceptUserId)){
+         return JSONResult.errorMsg("ERROR");
+      }
+
+
+      List<com.chat9.pojo.ChatMsg> unreadMsgList = userService.getUnReadMsgList(acceptUserId);
+
+      return JSONResult.ok(unreadMsgList);
+
+   }
 
 }
