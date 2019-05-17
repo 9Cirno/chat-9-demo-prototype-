@@ -1,2 +1,2 @@
 # chat-9
-Under Developing
+This is prototype for the architecture, built for short demo purpose only.
